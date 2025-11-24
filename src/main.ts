@@ -19,22 +19,6 @@ import {
 
 const logger = createModuleLogger('Plugin')
 
-// const openedDevices = new Set<string>() // ids of currently-attached devices
-// function makeDeviceId(devname: string): string {
-// 	// this function ensures we don't assign the same id twice.
-// 	// for example with two devices, if user unplugs dev1 and replugs it, then
-// 	//   if we were simply tracking the number of devices, both devices would be assigned "dev2"
-// 	//  This code will reassign "dev1" instead...
-// 	let n = 1
-// 	while (true) {
-// 		const deviceId = `contourshuttle:${devname}-dev${n++}`
-// 		if (!openedDevices.has(deviceId)) {
-// 			openedDevices.add(deviceId)
-// 			return deviceId
-// 		}
-// 	}
-// }
-
 const ContourShuttlePlugin: SurfacePlugin<HIDDevice> = {
 	init: async (): Promise<void> => {
 		// Not used
@@ -50,7 +34,7 @@ const ContourShuttlePlugin: SurfacePlugin<HIDDevice> = {
 		logger.debug(`Checked HID device: ${device.manufacturer} ${device.product}`)
 
 		return {
-			surfaceId: `contourshuttle:${device.path}`, // TODO - this id should not be based on path
+			surfaceId: `contourshuttle:${device.serialNumber}`, // Use the faked serial number
 			description: `${device.manufacturer} ${device.product || 'Contour Shuttle'}`.trim(),
 			pluginInfo: device,
 		}
