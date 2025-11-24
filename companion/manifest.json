@@ -1,0 +1,20 @@
+{
+	"$schema": "../node_modules/@companion-surface/base/assets/manifest.schema.json",
+	"type": "surface",
+	"id": "contour-shuttle",
+	"name": "Contour Shuttle",
+	"shortname": "contour-shuttle",
+	"description": "",
+	"version": "0.0.0",
+	"license": "MIT",
+	"repository": "git+https://github.com/bitfocus/companion-surface-contour-shuttle.git",
+	"bugs": "https://github.com/bitfocus/companion-surface-contour-shuttle/issues",
+	"maintainers": [{ "name": "Julian Waller", "email": "git@julusian.co.uk" }],
+	"runtime": { "type": "node22", "apiVersion": "0.0.0", "entrypoint": "../dist/main.js" },
+	"keywords": ["contour", "shuttle"],
+	"products": ["Contour Shuttle"],
+	"usbIds": [
+		{ "vendorId": 2867, "productIds": [16, 32, 48] },
+		{ "vendorId": 1523, "productIds": [576] }
+	]
+}
