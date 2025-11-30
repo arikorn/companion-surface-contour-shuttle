@@ -39,7 +39,7 @@ export class ContourShuttleWrapper implements SurfaceInstance {
 		this.#shuttleRing = { val: 0, interval: undefined }
 
 		this.#contourShuttle.on('error', (error) => {
-			console.error(error)
+			this.#logger.error(error)
 			this.#clearRepeatingActions()
 			this.#context.disconnect(error)
 		})
