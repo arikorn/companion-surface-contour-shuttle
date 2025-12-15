@@ -5,7 +5,7 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"@companion-module/tools@npm:2.5.0":
+"@companion-module/tools@npm:^2.5.0":
   version: 2.5.0
   resolution: "@companion-module/tools@npm:2.5.0"
   dependencies:
@@ -1066,7 +1066,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "companion-surface-contour-shuttle@workspace:."
   dependencies:
-    "@companion-module/tools": "npm:2.5.0"
+    "@companion-module/tools": "npm:^2.5.0"
     "@companion-surface/base": "npm:~1.0.0"
     "@types/node": "npm:^22.19.3"
     "@types/semver": "npm:^7.7.1"
