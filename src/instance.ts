@@ -20,6 +20,24 @@ export class ContourShuttleWrapper implements SurfaceInstance {
 	readonly #surfaceId: string
 	readonly #context: SurfaceContext
 
+	static liveInstances = new Set<string>() // ids of currently-attached devices
+	static makeDeviceId(devname: string): string {
+		// this function ensures we don't assign the same id twice.
+		// for example with two devices, if user unplugs dev1 and replugs it, then
+		//   if we were simply tracking the number of devices, both devices would be assigned "dev2"
+		//  This code will reassign "dev1" instead...
+		let n = 1
+		const idName = devname.replaceAll(/[ \t:]/g, '_').toLowerCase() // we really only need to replace space
+		while (true) {
+			const deviceId = `contourshuttle:${idName}-dev${n++}`
+			if (!ContourShuttleWrapper.liveInstances.has(deviceId)) {
+				//ContourShuttleWrapper.liveInstances.add(deviceId)
+				console.log('Using ' + deviceId)
+				return deviceId
+			}
+		}
+	}
+
 	#shuttleRing: { val: number; interval: ReturnType<typeof setInterval> | undefined }
 
 	public get surfaceId(): string {
@@ -35,8 +53,13 @@ export class ContourShuttleWrapper implements SurfaceInstance {
 		this.#modelInfo = info
 		this.#surfaceId = surfaceId
 		this.#context = context
-
 		this.#shuttleRing = { val: 0, interval: undefined }
+
+		if (ContourShuttleWrapper.liveInstances.has(surfaceId)) {
+			this.#logger.error(`adding ${surfaceId}, which is already live.`)
+		}
+		ContourShuttleWrapper.liveInstances.add(this.#surfaceId)
+		console.log(`Added ${this.#surfaceId}`)
 
 		this.#contourShuttle.on('error', (error) => {
 			this.#logger.error(error)
@@ -146,6 +169,8 @@ export class ContourShuttleWrapper implements SurfaceInstance {
 		// clear shuttle-ring activity.
 		this.#contourShuttle.on('disconnected', () => {
 			this.#clearRepeatingActions()
+			ContourShuttleWrapper.liveInstances.delete(this.#surfaceId) // just to be safe
+			console.log(`Disconnected ${this.#surfaceId}`)
 			this.#context.disconnect(new Error('Device disconnected'))
 		})
 	}
@@ -163,9 +188,11 @@ export class ContourShuttleWrapper implements SurfaceInstance {
 	}
 	async close(): Promise<void> {
 		this.#clearRepeatingActions()
+		ContourShuttleWrapper.liveInstances.delete(this.#surfaceId)
 		this.#contourShuttle.close().catch((e) => {
 			this.#logger.error(`Failed to close contour shuttle: ${e}`)
 		})
+		console.log(`Closed ${this.#surfaceId}`)
 	}
 
 	updateCapabilities(_capabilities: HostCapabilities): void {

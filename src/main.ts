@@ -7,7 +7,7 @@ import {
 	type SurfaceContext,
 	type SurfacePlugin,
 } from '@companion-surface/base'
-import { isAShuttleDevice, ProductModelId, setupShuttle } from 'shuttle-node'
+import { isAShuttleDevice, ProductModelId, setupShuttle, Product, PRODUCTS } from 'shuttle-node'
 import { ContourShuttleWrapper } from './instance.js'
 import { createSurfaceSchema } from './surface-schema.js'
 import {
@@ -18,6 +18,12 @@ import {
 } from './models.js'
 
 const logger = createModuleLogger('Plugin')
+
+// get the correct product name based on the HID info
+function getProduct(vendorId: number, productId: number): Product | undefined {
+	const products = Object.values<Product>(PRODUCTS)
+	return products.find((product) => product.productId === productId && product.vendorId === vendorId)
+}
 
 const ContourShuttlePlugin: SurfacePlugin<HIDDevice> = {
 	init: async (): Promise<void> => {
@@ -31,11 +37,21 @@ const ContourShuttlePlugin: SurfacePlugin<HIDDevice> = {
 		const isShuttle = isAShuttleDevice(device)
 		if (!isShuttle) return null
 
-		logger.debug(`Checked HID device: ${device.manufacturer} ${device.product}`)
+		logger.debug(
+			`Checked HID device: ${device.manufacturer} (0x${device.vendorId.toString(16)}); ${device.product}  (0x${device.productId.toString(16)})`,
+		)
+		const productInfo = getProduct(device.vendorId, device.productId)
+		if (!productInfo) {
+			// this should be impossible:
+			throw new Error(
+				`Contour device is unknown: ${device.manufacturer} (0x${device.vendorId.toString(16)}); ${device.product}  (0x${device.productId.toString(16)})`,
+			)
+		}
+		const fakeId = ContourShuttleWrapper.makeDeviceId(productInfo.name)
 
 		return {
-			surfaceId: `contourshuttle:${device.serialNumber}`, // Use the faked serial number
-			description: `${device.manufacturer} ${device.product || 'Contour Shuttle'}`.trim(),
+			surfaceId: fakeId,
+			description: `${device.manufacturer} ${productInfo.name || 'Contour Shuttle'}`.trim(),
 			pluginInfo: device,
 		}
 	},
